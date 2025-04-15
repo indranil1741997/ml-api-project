@@ -2,29 +2,26 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
 import numpy as np
-import uvicorn
 
-# Create the FastAPI app
 app = FastAPI(title="ML Model API")
 
-# Load the pre-trained model
+# Load model
 model = joblib.load("app/model.pkl")
 
-# Define the input data structure
+# Iris target names
+target_names = ["Iris-setosa", "Iris-versicolor", "Iris-virginica"]
+
+# Input model
 class InputData(BaseModel):
     feature1: float
     feature2: float
     feature3: float
     feature4: float
 
-# Define the prediction endpoint
+# Prediction route
 @app.post("/predict")
 def predict(data: InputData):
-    # Convert input to the format the model expects
     features = np.array([[data.feature1, data.feature2, data.feature3, data.feature4]])
-
-    # Make prediction
     prediction = model.predict(features)
-
-    # Return the prediction
-    return {"prediction": int(prediction[0])}
+    class_name = target_names[prediction[0]]
+    return {"prediction": class_name}
